@@ -4,9 +4,11 @@ pragma solidity ^0.8.12;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
+import "@openzeppelin/contracts/utils/Base64.sol";
 import "@account-abstraction/contracts/samples/SimpleAccount.sol";
 import "./JWT.sol";
 import "hardhat/console.sol";
+import "./lib/LibRsa.sol";
 
 /**
  * minimal account.
@@ -24,15 +26,27 @@ contract NonZKGoogleAccount is JWT, SimpleAccount {
         sub = _sub;
     }
 
-    function updateOwnerByGoogleOIDC(string memory id_token) external view returns (uint256 validationData) {
-        // TODO: parse userOp.signature
-        // string memory header = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9";
-        // string
-        //     memory payload = '{"iss":"http://server.example.com","sub":"248289761001","aud":"s6BhdRkqt3","nonce":"0x8d9abb9b140bd3c63db2ce7ee3171ab1c2284fd905ad13156df1069a1918b2b3","iat":1311281970,"exp":1726640433,"name":"JaneDoe","given_name":"Jane","family_name":"Doe","gender":"female","birthdate":"0000-10-31","email":"janedoe@example.com","picture":"http://example.com/janedoe/me.jpg"}';
-        // string memory payload = '{"iss":"http://server.example.com","sub":"248289761001"}';
-        // bytes
-        //     memory signature = hex"36afd1c5e35b74850fba558d508f1fcbe1bc4501ce53545d785f08a5f36d6136d3a90f951b0e9f88f22c652a76e6fd019b5afd25350543b06fe353c8548eed33c210463fba20bfca42beed4785b7ac45ab5eded1a575e28bdc400e97edfbbcd7ddf9342a59ea55a42d17b5419a9cb55fb3eba3d70687e4f8a726901272740ad0a29ffb3f6edccbb61e9931953c9f66600841a54a13e6540c736be5eb704526482f8d8388a301000751427c3481ff5ed702e88d760a0638fb7e688a1490da054b76d42ef964dd5a055218f1e02f5de7bc3a1f83b279572225fd2333b9137d88cdfc91dda4c242b707e6ab739944f681c371114632d63fd739cf069e9019abdacf";
-        if (keccak256(abi.encodePacked(sub)) != keccak256(abi.encodePacked(getSub(id_token))))
+    function verifySig(
+        string calldata header,
+        string calldata idToken,
+        bytes calldata sig
+    ) public view returns (uint256 validationData) {
+        string memory payload = Base64.encode(bytes(idToken));
+        if (
+            LibRsa.rsapkcs1Verify(
+                sha256(abi.encodePacked(header, ".", payload)),
+                hex"c61e4b8d980041ab0c39de06ed6b03187e9e3c6eb6649ec58176d3ed4e5a004a1422a0ee0098f6a0d5d1a364eb18a3e866dd59d8eda78008eba5966868be01baba31c2756a30bb7c2c98fab5bd55d8eb17d6f22fbc3057649f9796c49283d25fd94175ea3b4c1d1e055a29feb5c3ec9984a8b9b280cf1d6171faaef7e53b9891d3b76f58fcb1e03a4a7278d76d0c1d76e3b081f4dc233bba4d90b351949faafb38e9cce83190cdf0160dfbbd8d633bd505561fee13dcb7547f7b6c40797c79cfa13d809e45e2e6a82e07abcae2df7bad1e14af0fa633144f68bc4183ee428a5e9ca89d9e35381c6087cce73a6ab5db5728cc2801754c29fc9d89d2f3fdb84e6b",
+                hex"010001",
+                sig
+            )
+        ) {
+            return 0;
+        }
+        return SIG_VALIDATION_FAILED;
+    }
+
+    function verifySub(string calldata idToken) public view returns (uint256 validationData) {
+        if (keccak256(abi.encodePacked(sub)) != keccak256(abi.encodePacked(getSub(idToken))))
             return SIG_VALIDATION_FAILED;
 
         return 0;

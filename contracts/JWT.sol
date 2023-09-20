@@ -6,7 +6,7 @@ contract JWT {
     using JsmnSolLib for string;
 
     function getSub(string memory json) public pure returns (string memory) {
-        (uint exitCode, JsmnSolLib.Token[] memory tokens, uint ntokens) = json.parse(20);
+        (uint exitCode, JsmnSolLib.Token[] memory tokens, uint ntokens) = json.parse(30);
         require(exitCode == 0, "JSON parse failed");
 
         require(tokens[0].jsmnType == JsmnSolLib.JsmnType.OBJECT, "Expected JWT to be an object");

@@ -6,6 +6,13 @@ import { ethers } from "hardhat";
 import { SimpleAccountAPI } from "@account-abstraction/sdk";
 
 describe("GoogleAccount", function () {
+  const header = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9";
+  // const idToken = '{"iss":"http://server.example.com","sub":"248289761001"}';
+  const idToken =
+    '{"iss":"http://server.example.com","sub":"248289761001","aud":"s6BhdRkqt3","nonce":"0x8d9abb9b140bd3c63db2ce7ee3171ab1c2284fd905ad13156df1069a1918b2b3","iat":1311281970,"exp":1726640433,"name":"Jane Doe","given_name":"Jane","family_name":"Doe","gender":"female","birthdate":"0000-10-31","email":"janedoe@example.com","picture":"http://example.com/janedoe/me.jpg"}';
+  const sig =
+    "0x36afd1c5e35b74850fba558d508f1fcbe1bc4501ce53545d785f08a5f36d6136d3a90f951b0e9f88f22c652a76e6fd019b5afd25350543b06fe353c8548eed33c210463fba20bfca42beed4785b7ac45ab5eded1a575e28bdc400e97edfbbcd7ddf9342a59ea55a42d17b5419a9cb55fb3eba3d70687e4f8a726901272740ad0a29ffb3f6edccbb61e9931953c9f66600841a54a13e6540c736be5eb704526482f8d8388a301000751427c3481ff5ed702e88d760a0638fb7e688a1490da054b76d42ef964dd5a055218f1e02f5de7bc3a1f83b279572225fd2333b9137d88cdfc91dda4c242b707e6ab739944f681c371114632d63fd739cf069e9019abdacf";
+
   async function deployAccountFixture() {
     const [owner] = await ethers.getSigners();
 
@@ -37,7 +44,6 @@ describe("GoogleAccount", function () {
       // };
       // const aaProvider = await wrapProvider(hre.network.provider, config);
       //
-      console.log(acc.interface);
 
       const walletAPI = new SimpleAccountAPI({
         provider: hre.ethers.provider,
@@ -49,7 +55,6 @@ describe("GoogleAccount", function () {
         target: acc.address,
         data: acc.interface.encodeFunctionData("updateOwnerByGoogleOIDC"),
       });
-      console.log(op);
       // const builder = new UserOperationBuilder().useDefaults({});
       // const userOp = await builder.buildOp(ep.address, 31337);
       // console.log(userOp);
@@ -57,12 +62,21 @@ describe("GoogleAccount", function () {
       // await ep.handleOps([userOp], beneficiary.address);
       // expect(await acc.sub()).to.equal(process.env.SUB);
     });
-    it("updateOwnerByGoogleOIDC", async function () {
+    it("verifySub", async function () {
       const { acc } = await loadFixture(deployAccountFixture);
-      const idToken = '{"iss":"http://server.example.com","sub":"248289761001"}';
-      expect(await acc.updateOwnerByGoogleOIDC(idToken)).to.equal(0);
+      expect(await acc.verifySub(idToken)).to.equal(0);
       const wrongIdToken = '{"iss":"http://server.example.com","sub":"248289761000"}';
-      expect(await acc.updateOwnerByGoogleOIDC(wrongIdToken)).to.equal(1);
+      expect(await acc.verifySub(wrongIdToken)).to.equal(1);
+    });
+    it("verifySig", async function () {
+      const { acc } = await loadFixture(deployAccountFixture);
+      expect(await acc.verifySig(header, idToken, sig)).to.equal(0);
+
+      const wrongHeader = header + "1";
+      expect(await acc.verifySig(wrongHeader, idToken, sig)).to.equal(1);
+
+      const wrongSig = sig.slice(0, -2) + "00";
+      expect(await acc.verifySig(header, idToken, wrongSig)).to.equal(1);
     });
   });
 });

@@ -91,7 +91,7 @@ describe("GoogleAccount", function () {
       expect(await sca.owner()).to.equal(newOwner.address);
       expect(await sca.recoveryNonce()).to.equal(newRecoveryNonce);
     });
-    it.only("API", async function () {
+    it("API", async function () {
       const { ep, sca, scaFactory, owner, newOwner } = await loadFixture(deployAccountFixture);
 
       await hre.network.provider.send("hardhat_setBalance", [sca.address, "0x1000000000000000000"]);
@@ -115,23 +115,9 @@ describe("GoogleAccount", function () {
         ]),
       });
 
-      // const op = await walletAPI.encodeExecute(
-      //   sca.address,
-      //   0,
-      //   sca.interface.encodeFunctionData("updateOwnerByGoogleOIDC", [
-      //     newOwner.address,
-      //     header,
-      //     idToken,
-      //     sig,
-      //     newRecoveryNonce,
-      //   ]),
-      // );
-      // console.log(op);
-      // const builder = new UserOperationBuilder().useDefaults({});
-      // const userOp = await builder.buildOp(ep.address, 31337);
-      // console.log(userOp);
-
+      expect(await sca.owner()).to.equal(owner.address);
       await ep.handleOps([userOp], newOwner.address);
+      expect(await sca.owner()).to.equal(newOwner.address);
     });
   });
 });

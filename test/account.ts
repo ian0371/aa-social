@@ -67,19 +67,31 @@ describe("GoogleAccount", function () {
     });
     it("verifySub", async function () {
       const { acc } = await loadFixture(deployAccountFixture);
-      expect(await acc.verifySub(idToken)).to.equal(0);
+      expect(await acc.verifySub(idToken)).to.equal(true);
       const wrongIdToken = '{"iss":"http://server.example.com","sub":"248289761000"}';
-      expect(await acc.verifySub(wrongIdToken)).to.equal(1);
+      expect(await acc.verifySub(wrongIdToken)).to.equal(false);
     });
     it("verifySig", async function () {
       const { acc } = await loadFixture(deployAccountFixture);
-      expect(await acc.verifySig(header, idToken, sig)).to.equal(0);
+      expect(await acc.verifySig(header, idToken, sig)).to.equal(true);
 
       const wrongHeader = header + "1";
-      expect(await acc.verifySig(wrongHeader, idToken, sig)).to.equal(1);
+      expect(await acc.verifySig(wrongHeader, idToken, sig)).to.equal(false);
 
       const wrongSig = sig.slice(0, -2) + "00";
-      expect(await acc.verifySig(header, idToken, wrongSig)).to.equal(1);
+      expect(await acc.verifySig(header, idToken, wrongSig)).to.equal(false);
+    });
+    it("verifyNonce", async function () {
+      const { acc } = await loadFixture(deployAccountFixture);
+      expect(await acc.verifyNonce(idToken)).to.equal(true);
+    });
+    it("updateOwnerByGoogleOIDC", async function () {
+      const { acc } = await loadFixture(deployAccountFixture);
+      const [, newOwner] = await ethers.getSigners();
+      const newRecoveryNonce = "0xf26250c0d89849666ff4ec5a46887c36965d22cc0140292ce9be653172190310";
+      await acc.updateOwnerByGoogleOIDC(newOwner.address, header, idToken, sig, newRecoveryNonce);
+      expect(await acc.owner()).to.equal(newOwner.address);
+      expect(await acc.recoveryNonce()).to.equal(newRecoveryNonce);
     });
   });
 });

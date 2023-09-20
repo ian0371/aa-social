@@ -18,19 +18,32 @@ import "./lib/LibRsa.sol";
  */
 contract NonZKGoogleAccount is JWT, SimpleAccount {
     string public sub;
+    string public recoveryNonce;
 
     constructor(IEntryPoint anEntryPoint) SimpleAccount(anEntryPoint) {}
 
     function initialize(address anOwner, string memory _sub) public virtual initializer {
         _initialize(anOwner);
         sub = _sub;
+        recoveryNonce = "0x8d9abb9b140bd3c63db2ce7ee3171ab1c2284fd905ad13156df1069a1918b2b3";
     }
 
-    function verifySig(
+    function updateOwnerByGoogleOIDC(
+        address newOwner,
         string calldata header,
         string calldata idToken,
-        bytes calldata sig
-    ) public view returns (uint256 validationData) {
+        bytes calldata sig,
+        string calldata newRecoveryNonce
+    ) external {
+        require(verifySig(header, idToken, sig), "verifySig failed");
+        require(verifySub(idToken), "verifySub failed");
+        require(verifyNonce(idToken), "verifyNonce failed");
+
+        owner = newOwner;
+        recoveryNonce = newRecoveryNonce;
+    }
+
+    function verifySig(string calldata header, string calldata idToken, bytes calldata sig) public view returns (bool) {
         string memory payload = Base64.encode(bytes(idToken));
         if (
             LibRsa.rsapkcs1Verify(
@@ -40,15 +53,20 @@ contract NonZKGoogleAccount is JWT, SimpleAccount {
                 sig
             )
         ) {
-            return 0;
+            return true;
         }
-        return SIG_VALIDATION_FAILED;
+        return false;
     }
 
-    function verifySub(string calldata idToken) public view returns (uint256 validationData) {
-        if (keccak256(abi.encodePacked(sub)) != keccak256(abi.encodePacked(getSub(idToken))))
-            return SIG_VALIDATION_FAILED;
+    function verifySub(string calldata idToken) public view returns (bool) {
+        if (keccak256(abi.encodePacked(sub)) == keccak256(abi.encodePacked(getSub(idToken)))) return true;
 
-        return 0;
+        return false;
+    }
+
+    function verifyNonce(string calldata idToken) public view returns (bool) {
+        if (keccak256(abi.encodePacked(recoveryNonce)) == keccak256(abi.encodePacked(getNonce(idToken)))) return true;
+
+        return false;
     }
 }

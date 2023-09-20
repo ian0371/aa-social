@@ -36,3 +36,4 @@ main().catch((error) => {
 ```sol
 import "%%your package%%/contracts/%%your contract%%.sol";
 ```
+# aa-social

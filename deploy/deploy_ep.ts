@@ -7,7 +7,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  await deploy("Counter", {
+  await deploy("EntryPoint", {
     from: deployer,
     gasLimit: 4000000,
     args: [],
@@ -15,6 +15,5 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   });
 };
 
-func.tags = ["Counter"];
-// func.dependencies = ["Lock"]; // this ensures Lock is deployed before Counter
+func.tags = ["EntryPoint"];
 export default func;

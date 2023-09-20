@@ -57,10 +57,11 @@
   },
   "dependencies": {
     "@account-abstraction/contracts": "^0.6.0",
+    "@account-abstraction/sdk": "^0.6.0",
     "@klaytn/hardhat-utils": "^0.0.9",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@openzeppelin/contracts": "^4.9.3",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.3.1"
   },
   "directories": {
     "lib": "lib",

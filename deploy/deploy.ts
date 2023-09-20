@@ -11,7 +11,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   await deploy("NonZkGoogleAccount", {
     from: deployer,
     gasLimit: 4000000,
-    args: [EntryPoint.address, "248289761001"],
+    args: [EntryPoint.address, process.env.SUB],
     log: true,
   });
 };

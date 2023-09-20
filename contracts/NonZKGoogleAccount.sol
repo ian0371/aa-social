@@ -16,16 +16,16 @@ import "./lib/LibRsa.sol";
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract NonZKGoogleAccount is JWT, SimpleAccount {
+contract NonZKGoogleAccount is SimpleAccount, JWT {
     string public sub;
     string public recoveryNonce;
 
     constructor(IEntryPoint anEntryPoint) SimpleAccount(anEntryPoint) {}
 
-    function initialize(address anOwner, string memory _sub) public virtual initializer {
+    function initialize(address anOwner, string memory _sub, string memory _recoveryNonce) public virtual initializer {
         _initialize(anOwner);
         sub = _sub;
-        recoveryNonce = "0x8d9abb9b140bd3c63db2ce7ee3171ab1c2284fd905ad13156df1069a1918b2b3";
+        recoveryNonce = _recoveryNonce;
     }
 
     function updateOwnerByGoogleOIDC(
@@ -59,13 +59,13 @@ contract NonZKGoogleAccount is JWT, SimpleAccount {
     }
 
     function verifySub(string calldata idToken) public view returns (bool) {
-        if (keccak256(abi.encodePacked(sub)) == keccak256(abi.encodePacked(getSub(idToken)))) return true;
+        if (keccak256(abi.encodePacked(sub)) == keccak256(abi.encodePacked(_getSub(idToken)))) return true;
 
         return false;
     }
 
     function verifyNonce(string calldata idToken) public view returns (bool) {
-        if (keccak256(abi.encodePacked(recoveryNonce)) == keccak256(abi.encodePacked(getNonce(idToken)))) return true;
+        if (keccak256(abi.encodePacked(recoveryNonce)) == keccak256(abi.encodePacked(_getNonce(idToken)))) return true;
 
         return false;
     }

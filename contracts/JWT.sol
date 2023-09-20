@@ -5,7 +5,7 @@ import "./lib/JsmnSolLib.sol";
 contract JWT {
     using JsmnSolLib for string;
 
-    function getSub(string memory json) public pure returns (string memory) {
+    function _getSub(string memory json) internal pure returns (string memory) {
         (uint exitCode, JsmnSolLib.Token[] memory tokens, uint ntokens) = json.parse(30);
         require(exitCode == 0, "JSON parse failed");
 
@@ -24,7 +24,7 @@ contract JWT {
         revert("Could not find sub in JWT object");
     }
 
-    function getNonce(string memory json) public pure returns (string memory) {
+    function _getNonce(string memory json) internal pure returns (string memory) {
         (uint exitCode, JsmnSolLib.Token[] memory tokens, uint ntokens) = json.parse(30);
         require(exitCode == 0, "JSON parse failed");
 

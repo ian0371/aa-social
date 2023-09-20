@@ -94,6 +94,8 @@ describe("GoogleAccount", function () {
     it.only("API", async function () {
       const { ep, sca, scaFactory, owner, newOwner } = await loadFixture(deployAccountFixture);
 
+      await hre.network.provider.send("hardhat_setBalance", [sca.address, "0x1000000000000000000"]);
+
       const walletAPI = new NonZKGoogleAccountAPI({
         provider: hre.ethers.provider,
         entryPointAddress: ep.address,

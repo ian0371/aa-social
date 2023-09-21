@@ -5,4 +5,3 @@ export const idToken = atob(payload); // {"iss":"http://server.example.com","sub
 export const sig = "0x" + Buffer.from(signature, "base64").toString("hex"); // 0x36afd1c5e35b74850fba558d508f1fcbe1bc4501ce53545d785f08a5f36d6136d3a90f951b0e9f88f22c652a76e6fd019b5afd25350543b06fe353c8548eed33c210463fba20bfca42beed4785b7ac45ab5eded1a575e28bdc400e97edfbbcd7ddf9342a59ea55a42d17b5419a9cb55fb3eba3d70687e4f8a726901272740ad0a29ffb3f6edccbb61e9931953c9f66600841a54a13e6540c736be5eb704526482f8d8388a301000751427c3481ff5ed702e88d760a0638fb7e688a1490da054b76d42ef964dd5a055218f1e02f5de7bc3a1f83b279572225fd2333b9137d88cdfc91dda4c242b707e6ab739944f681c371114632d63fd739cf069e9019abdacf
 export const sub = JSON.parse(idToken).sub;
 export const recoveryNonce = JSON.parse(idToken).nonce;
-export const newRecoveryNonce = "0xf26250c0d89849666ff4ec5a46887c36965d22cc0140292ce9be653172190310";

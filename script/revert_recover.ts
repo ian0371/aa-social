@@ -1,16 +1,18 @@
 import { ethers } from "hardhat";
-import { sub, recoveryNonce } from "./config";
+import { header, idToken, sig, sub } from "./config_revert";
+import { recoveryNonce } from "./config";
 import { getContractFromDeployment } from "../lib";
 
 async function main() {
-  const [owner] = await ethers.getSigners();
+  const [owner, newOwner] = await ethers.getSigners();
   const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
   const scaAddr: string = await scaFactory.getAddress(owner.address, 1, sub, recoveryNonce);
   const sca = await ethers.getContractAt("NonZKGoogleAccount", scaAddr);
 
-  const tx = await sca.addDeposit({ value: ethers.utils.parseEther("0.05") });
+  console.log("sca owner before tx", await sca.owner());
+  const tx = await sca.connect(newOwner).updateOwnerByGoogleOIDC(owner.address, header, idToken, sig, recoveryNonce);
   await tx.wait();
-  console.log("deposit", ethers.utils.formatEther(await sca.getDeposit()), "ether");
+  console.log("sca owner after tx", await sca.owner());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -3,8 +3,8 @@ import { sub, recoveryNonce } from "./config";
 import { getContractFromDeployment } from "../lib";
 
 async function main() {
-  const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
   const [owner] = await ethers.getSigners();
+  const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
 
   const tx = await scaFactory.createAccount(owner.address, 1, sub, recoveryNonce);
   await tx.wait();

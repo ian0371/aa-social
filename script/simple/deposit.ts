@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { getContractFromDeployment } from "../lib";
+import { getContractFromDeployment } from "../../lib";
 
 async function main() {
   const scaFactory = await getContractFromDeployment("SimpleAccountFactory");

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { getContractFromDeployment } from "../lib";
+import { getContractFromDeployment } from "../../lib";
 import { SimpleAccountAPI } from "@account-abstraction/sdk";
 
 async function main() {

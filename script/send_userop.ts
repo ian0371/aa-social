@@ -1,12 +1,12 @@
 import { ethers } from "hardhat";
-import { sub, recoveryNonce } from "./config";
-import { getContractFromDeployment, NonZKGoogleAccountAPI } from "./lib";
+import { defaultEntryPoint, sub, recoveryNonce } from "./config";
+import { getContractFromDeployment, NonZKGoogleAccountAPI } from "../lib";
 
 async function main() {
   const ep = await getContractFromDeployment("EntryPoint");
   const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
   const counter = await getContractFromDeployment("Counter");
-  const [owner, bundler] = await ethers.getSigners();
+  const [owner] = await ethers.getSigners();
 
   const walletAPI = new NonZKGoogleAccountAPI({
     provider: ethers.provider,
@@ -21,8 +21,10 @@ async function main() {
     data: counter.interface.encodeFunctionData("increment"),
   });
 
-  await ep.handleOps([userOp], bundler.address);
-  console.log(await counter.number());
+  console.log("counter.number before tx", await counter.number());
+  const tx = await ep.handleOps([userOp], owner.address);
+  await tx.wait();
+  console.log("counter.number after tx", await counter.number());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -6,16 +6,16 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
-  const EntryPoint = await deployments.get("EntryPoint");
+  const epAddress = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 
-  await deploy("NonZKGoogleAccount", {
+  await deploy("NonZKGoogleAccountFactory", {
     from: deployer,
-    gasLimit: 4000000,
-    args: [EntryPoint.address, process.env.SUB],
+    gasLimit: 8000000,
+    args: [epAddress],
     log: true,
   });
 };
 
-func.tags = ["NonZKGoogleAccount"];
-func.dependencies = ["EntryPoint"];
+func.tags = ["NonZKGoogleAccountFactory"];
+// func.dependencies = ["EntryPoint"];
 export default func;

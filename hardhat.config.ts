@@ -13,7 +13,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.18",
+        version: "0.8.18", // mumbai doesn't support PUSH0 yet
         settings: { optimizer: { enabled: true, runs: 200 } },
       },
     ],

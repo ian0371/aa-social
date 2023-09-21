@@ -5,13 +5,11 @@ import { getContractFromDeployment } from "./lib";
 async function main() {
   const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
   const [owner] = await ethers.getSigners();
-
-  await scaFactory.createAccount(owner.address, 1, sub, recoveryNonce);
-
   const scaAddr: string = await scaFactory.getAddress(owner.address, 1, sub, recoveryNonce);
   const sca = await ethers.getContractAt("NonZKGoogleAccount", scaAddr);
-  console.log("sca deployed to", scaAddr);
-  console.log("owner:", await sca.owner());
+
+  await sca.addDeposit({ value: ethers.utils.parseEther("0.1") });
+  console.log("deposit", ethers.utils.formatEther(await sca.getDeposit()), "ether");
 }
 
 // We recommend this pattern to be able to use async/await everywhere

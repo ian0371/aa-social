@@ -5,11 +5,8 @@ import { SimpleAccountAPI } from "@account-abstraction/sdk";
 async function main() {
   const ep = await getContractFromDeployment("EntryPoint");
   const scaFactory = await getContractFromDeployment("SimpleAccountFactory");
-  const [owner, bundler] = await ethers.getSigners();
-  const scaAddr: string = await scaFactory.getAddress(owner.address, 1);
-  const sca = await ethers.getContractAt("SimpleAccount", scaAddr);
-
   const counter = await getContractFromDeployment("Counter");
+  const [owner, bundler] = await ethers.getSigners();
 
   const walletAPI = new SimpleAccountAPI({
     provider: ethers.provider,
@@ -24,6 +21,7 @@ async function main() {
   });
 
   await ep.handleOps([userOp], bundler.address);
+  console.log(await counter.number());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -19,7 +19,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   });
 
   const ep = await deployments.get("EntryPoint");
-  await deploy("NonZKGoogleAccountFactory", {
+  await deploy("SimpleAccountFactory", {
     from: deployer.address,
     gasLimit: 8000000,
     args: [ep.address],
@@ -34,5 +34,5 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   });
 };
 
-func.tags = ["localhost"];
+func.tags = ["simple"];
 export default func;

@@ -116,7 +116,8 @@ describe("GoogleAccount", function () {
       });
 
       expect(await sca.owner()).to.equal(owner.address);
-      await ep.handleOps([userOp], newOwner.address);
+      const bundler = newOwner;
+      await ep.handleOps([userOp], bundler.address);
       expect(await sca.owner()).to.equal(newOwner.address);
     });
   });

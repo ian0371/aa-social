@@ -1,12 +1,13 @@
 import { deployments, ethers } from "hardhat";
+import { sub, recoveryNonce } from "./config";
 
 async function main() {
   const factoryDeployment = await deployments.get("NonZKGoogleAccountFactory");
   const factory = await ethers.getContractAt("NonZKGoogleAccountFactory", factoryDeployment.address);
   const [owner] = await ethers.getSigners();
 
-  await factory.createAccount(owner.address, 1, process.env.SUB, process.env.NONCE);
-  const scaAddr: string = await factory.getAddress(owner.address, 1, process.env.SUB, process.env.NONCE);
+  await factory.createAccount(owner.address, 1, sub, recoveryNonce);
+  const scaAddr: string = await factory.getAddress(owner.address, 1, sub, recoveryNonce);
   console.log("sca deployed to", scaAddr);
 
   const sca = await ethers.getContractAt("NonZKGoogleAccount", scaAddr);

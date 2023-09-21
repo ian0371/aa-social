@@ -10,7 +10,7 @@ async function main() {
 
   const tx = await sca.addDeposit({ value: ethers.utils.parseEther("0.05") });
   await tx.wait();
-  console.log("deposit", ethers.utils.formatEther(await sca.getDeposit()), "ether");
+  console.log("total deposit", ethers.utils.formatEther(await sca.getDeposit()), "ether");
 }
 
 // We recommend this pattern to be able to use async/await everywhere

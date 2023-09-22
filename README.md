@@ -47,7 +47,7 @@ counter.number after tx BigNumber { value: "1" }
 ## Recovery
 
 ```
-npx hardhat run script/send_userop.ts --network localhost
+npx hardhat run script/recover.ts --network localhost
 ```
 
 Output:
@@ -82,10 +82,26 @@ Counter: 0xa2688D6555F42b3A5131408Da66dE1409b7db87D
 
 ## Setup SCA
 
+Check the output address of SCA.
+
+```
+npx hardhat run script/sca_account.ts --network mumbai
+```
+
+```
+* signer: 0xBeBe3506E02c6EA2039B48cEb462Da6F7AfE6a89
+* sca: 0x426CBEA49B6CD836D3A0e6151a2f0e3039654FD4
+* sca.owner: 0xBeBe3506E02c6EA2039B48cEb462Da6F7AfE6a89
+* deposit: 0.04ether
+* sub: 248289761001
+* recoveryNonce: 0x8d9abb9b140bd3c63db2ce7ee3171ab1c2284fd905ad13156df1069a1918b2b3
+```
+
+If the output says it does not exist, you must create an account and make a deposit of 0.05 ether:
+
 ```
 npx hardhat run script/create_account.ts --network mumbai
 npx hardhat run script/deposit.ts --network mumbai
-npx hardhat run script/sca_address.ts --network mumbai
 ```
 
 ## Send UserOp (Using bundler)
@@ -96,8 +112,22 @@ npx hardhat run script/send_userop_bundler.ts --network mumbai
 
 NOTE: you may need to adjust `maxFeePerGas`, `maxPriorityFeePerGas` on error.
 
+Output:
+
+```
+counter.number before tx BigNumber { value: "0" }
+counter.number after tx BigNumber { value: "1" }
+```
+
 ## recover address
 
 ```
 npx hardhat run script/recover.ts --network mumbai
+```
+
+Output:
+
+```
+sca owner before tx 0xBeBe3506E02c6EA2039B48cEb462Da6F7AfE6a89
+sca owner after tx 0x47a945D6FaAad8512Cd10432FDf98b5A862DaC10
 ```

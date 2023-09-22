@@ -35,12 +35,10 @@ export function parseJwt(jwtToken: string) {
 
 export class NonZKGoogleAccountAPI extends SimpleAccountAPI {
   sub: string;
-  salt: number;
 
   constructor(params: any) {
     super(params);
     this.sub = params.sub;
-    this.salt = params.salt;
   }
 
   async getAccountInitCode() {
@@ -54,7 +52,7 @@ export class NonZKGoogleAccountAPI extends SimpleAccountAPI {
       this.factory.address,
       (this.factory as any).interface.encodeFunctionData("createAccount", [
         await this.owner.getAddress(),
-        this.salt,
+        this.index,
         this.sub,
       ]),
     ]);

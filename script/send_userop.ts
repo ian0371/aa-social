@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { sub, recoveryNonce } from "./config";
+import { sub } from "./config";
 import { getContractFromDeployment, NonZKGoogleAccountAPI } from "../lib";
 
 async function main() {

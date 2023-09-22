@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { sub, recoveryNonce } from "./config";
+import { sub } from "./config";
 import { getContractFromDeployment } from "../lib";
 
 export async function promiseAllMap<T, M extends Record<string, T | PromiseLike<T>>>(
@@ -18,7 +18,7 @@ export async function promiseAllMap<T, M extends Record<string, T | PromiseLike<
 async function main() {
   const [signer] = await hre.ethers.getSigners();
   const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
-  const scaAddr: string = await scaFactory.getAddress(signer.address, 1, sub, recoveryNonce);
+  const scaAddr: string = await scaFactory.getAddress(signer.address, 0, sub);
   const sca = await hre.ethers.getContractAt("NonZKGoogleAccount", scaAddr);
   const scaCode = await hre.ethers.provider.getCode(scaAddr);
   if (scaCode.length <= 2) {
@@ -34,7 +34,6 @@ async function main() {
     "sca.owner": sca.owner() as Promise<string>,
     deposit: ethers.utils.formatEther(await sca.getDeposit()).slice(0, 4) + "ether",
     sub: sca.sub() as Promise<string>,
-    recoveryNonce: sca.recoveryNonce() as Promise<string>,
   };
   const info = await promiseAllMap(unresolved);
   for (const each of Object.keys(info)) {

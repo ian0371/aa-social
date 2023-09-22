@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { sub, recoveryNonce } from "./config";
+import { sub } from "./config";
 import { getContractFromDeployment, NonZKGoogleAccountAPI } from "../lib";
 import { HttpRpcClient } from "@account-abstraction/sdk";
 
@@ -15,7 +15,6 @@ async function main() {
     owner,
     factoryAddress: scaFactory.address,
     sub,
-    recoveryNonce,
   });
   const userOp = await walletAPI.createSignedUserOp({
     target: counter.address,

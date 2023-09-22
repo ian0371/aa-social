@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
-import { sub, recoveryNonce } from "./config";
+import { sub } from "./config";
 import { getContractFromDeployment } from "../lib";
 
 async function main() {
   const [owner] = await ethers.getSigners();
   const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
-  const scaAddr: string = await scaFactory.getAddress(owner.address, 1, sub, recoveryNonce);
+  const scaAddr: string = await scaFactory.getAddress(owner.address, 0, sub);
   const sca = await ethers.getContractAt("NonZKGoogleAccount", scaAddr);
 
   const tx = await sca.addDeposit({ value: ethers.utils.parseEther("0.05") });

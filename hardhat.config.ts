@@ -4,6 +4,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@klaytn/hardhat-utils";
 import "@primitivefi/hardhat-dodoc";
 import "dotenv/config";
+import { HttpRpcClient } from "@account-abstraction/sdk";
 import * as fs from "fs";
 import * as jose from "jose";
 
@@ -16,9 +17,9 @@ const defaultKey2 = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6
 const salt = 0;
 
 task("genjwt")
-  .addParam("token", "ID token json file path", "id_token.json")
-  .addParam("privkey", "Private key file path", "key.pem")
-  .addParam("nonce", "ID token nonce to override", "0")
+  .addOptionalParam("token", "ID token json file path", "id_token.json")
+  .addOptionalParam("privkey", "Private key file path", "key.pem")
+  .addOptionalParam("nonce", "ID token nonce to override", "0")
   .setAction(async ({ token, privkey, nonce }) => {
     const idToken = JSON.parse(fs.readFileSync(token).toString());
     idToken.nonce = nonce;
@@ -31,8 +32,15 @@ task("genjwt")
   });
 
 task("sca-account")
-  .addParam("addr", "SCA address")
-  .setAction(async ({ addr }) => {
+  .addOptionalParam("addr", "SCA address")
+  .addOptionalParam("jwt", "JWT token")
+  .setAction(async ({ addr, jwt }) => {
+    // calc addr from jwt
+    if (!addr) {
+      const [owner] = await hre.ethers.getSigners();
+      const { sub } = parseJwt(jwt);
+      addr = await getScaAddress(owner.address, salt, sub);
+    }
     const sca = await hre.ethers.getContractAt("NonZKGoogleAccount", addr);
     const unresolved = {
       sca: sca.address,
@@ -75,7 +83,8 @@ task("deposit")
 
 task("send-userop")
   .addParam("addr", "SCA address")
-  .setAction(async ({ addr }) => {
+  .addFlag("bundler", "Use bundler to send operation")
+  .setAction(async ({ addr, bundler }) => {
     const [owner] = await hre.ethers.getSigners();
     const ep = await getContractFromDeployment("EntryPoint");
     const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
@@ -93,11 +102,25 @@ task("send-userop")
     const userOp = await walletAPI.createSignedUserOp({
       target: counter.address,
       data: counter.interface.encodeFunctionData("increment"),
+      maxFeePerGas: 2813300001, // TODO: autofill
+      maxPriorityFeePerGas: 2803299983, // TODO: autofill
     });
 
     console.log("counter.number before tx", await counter.number());
-    const tx = await ep.handleOps([userOp], owner.address);
-    await tx.wait();
+    if (bundler) {
+      let rc;
+      for (;;) {
+        const client = new HttpRpcClient(hre.network.config.url ?? "", ep.address, hre.network.config.chainId ?? 80001);
+        const userOpHash = await client.sendUserOpToBundler(userOp);
+        rc = await hre.ethers.provider.send("eth_getUserOperationReceipt", [userOpHash]);
+        if (rc != null) break;
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        process.stdout.write(".");
+      }
+    } else {
+      const tx = await ep.handleOps([userOp], owner.address);
+      await tx.wait();
+    }
     console.log("counter.number after tx", await counter.number());
   });
 

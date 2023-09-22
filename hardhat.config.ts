@@ -49,14 +49,9 @@ task("sca-account")
 
 task("create-account")
   .addParam("jwt", "JWT string")
-  // .addParam("pubkey", "Public key file path", "key.pem")
-  .setAction(async ({ jwt, pubkey }) => {
+  .setAction(async ({ jwt }) => {
     const [owner] = await hre.ethers.getSigners();
-    // const [, payload] = jwt.split(".");
-    // const idToken = JSON.parse(atob(payload));
-    // const sub = idToken.sub;
     const { sub } = parseJwt(jwt);
-    // const pk = fs.readFileSync(pubkey);
 
     const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
     const tx = await scaFactory.createAccount(owner.address, salt, sub);
@@ -92,8 +87,8 @@ task("send-userop")
       entryPointAddress: ep.address,
       owner,
       factoryAddress: scaFactory.address,
+      // index: salt,
       sub: await sca.sub(),
-      salt: salt,
     });
     const userOp = await walletAPI.createSignedUserOp({
       target: counter.address,
@@ -115,7 +110,6 @@ task("recover")
     const { header, idToken, sig } = parseJwt(jwt);
 
     console.log("sca owner before tx", await sca.owner());
-    console.log(header, idToken, sig);
     const tx = await sca.updateOwnerByGoogleOIDC(newOwner.address, header, idToken, sig);
     await tx.wait();
     console.log("sca owner after tx", await sca.owner());

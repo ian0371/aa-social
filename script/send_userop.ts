@@ -14,7 +14,6 @@ async function main() {
     owner,
     factoryAddress: scaFactory.address,
     sub,
-    recoveryNonce,
   });
   const userOp = await walletAPI.createSignedUserOp({
     target: counter.address,

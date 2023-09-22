@@ -14,14 +14,14 @@ NEW_PRIVATE_KEY=0x5678
 ## Run a localhost network
 
 ```
-hh node --tags localhost
+npx hardhat node --tags localhost
 ```
 
 ## Setup SCA
 
 ```
-hh run script/create_account.ts --network localhost
-hh run script/deposit.ts --network localhost
+npx hardhat run script/create_account.ts --network localhost
+npx hardhat run script/deposit.ts --network localhost
 ```
 
 Output:
@@ -34,7 +34,7 @@ owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ## Send UserOp (No bundler)
 
 ```
-hh run script/send_userop.ts --network localhost
+npx hardhat run script/send_userop.ts --network localhost
 ```
 
 Output:
@@ -47,7 +47,7 @@ counter.number after tx BigNumber { value: "1" }
 ## Recovery
 
 ```
-hh run script/send_userop.ts --network localhost
+npx hardhat run script/send_userop.ts --network localhost
 ```
 
 Output:
@@ -62,7 +62,7 @@ sca owner after tx 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 Check two accounts are set
 
 ```
-hh accounts --network mumbai
+npx hardhat accounts --network mumbai
 ```
 
 Output:
@@ -83,14 +83,15 @@ Counter: 0xa2688D6555F42b3A5131408Da66dE1409b7db87D
 ## Setup SCA
 
 ```
-hh run script/create_account.ts --network mumbai
-hh run script/deposit.ts --network mumbai
+npx hardhat run script/create_account.ts --network mumbai
+npx hardhat run script/deposit.ts --network mumbai
+npx hardhat run script/sca_address.ts --network mumbai
 ```
 
 ## Send UserOp (Using bundler)
 
 ```
-hh run script/send_userop_bundler.ts --network mumbai
+npx hardhat run script/send_userop_bundler.ts --network mumbai
 ```
 
 NOTE: you may need to adjust `maxFeePerGas`, `maxPriorityFeePerGas` on error.
@@ -98,5 +99,5 @@ NOTE: you may need to adjust `maxFeePerGas`, `maxPriorityFeePerGas` on error.
 ## recover address
 
 ```
-hh run script/recover.ts --network mumbai
+npx hardhat run script/recover.ts --network mumbai
 ```

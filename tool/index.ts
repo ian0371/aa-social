@@ -2,8 +2,10 @@ import { program } from "commander";
 import * as jose from "jose";
 import * as fs from "fs";
 import { ethers } from "ethers";
-// import * as hre from "hardhat";
-import { getContractFromDeployment } from "../lib";
+import * as hre from "hardhat";
+// const hre = require("hardhat");
+// import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
 
 async function main() {
   program
@@ -20,6 +22,10 @@ async function main() {
     .option("--public-key <publicKeyFile>")
     .option("--network <network>")
     .action(createAccount);
+
+  program.command("test").option("--network <network>").action(test);
+  // program.command("test").action(test);
+
   // program.command("create-account <idtokenFile> <privateKeyFile> <nonce>").action(genJwt);
   program.parse();
 }
@@ -35,6 +41,13 @@ async function genJwt(options: { in: string; privateKey: string; recoveryNonce: 
   console.log(token);
 }
 
+async function getFromDeployment(name: string, network: string) {
+  const addr = JSON.parse(fs.readFileSync(`deployments/${network}/${name}.json`).toString()).address;
+  const artifact = hre.artifacts.readArtifactSync(name);
+  const iface = new ethers.utils.Interface(artifact.abi);
+  return new ethers.Contract(addr, iface);
+}
+
 async function createAccount(options: { jwt: string; salt: string; publicKey: string; network: string }) {
   let provider;
   if (options.network == "localhost") {
@@ -44,23 +57,25 @@ async function createAccount(options: { jwt: string; salt: string; publicKey: st
   } else {
     provider = ethers.getDefaultProvider();
   }
-  console.log(provider);
-  return;
-  // const [owner] = await hre.ethers.getSigners();
-  // const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
-  // const [header, payload, signature] = options.jwt.split(".");
-  // const idToken = JSON.parse(atob(payload));
-  // const sub = idToken.sub;
-  // const salt = options.salt ?? 1;
-  // const pk = fs.readFileSync(options.publicKey ?? "test_key.pem");
-  //
-  // const tx = await scaFactory.createAccount(owner.address, salt, sub);
-  // await tx.wait();
-  //
-  // const scaAddr: string = await scaFactory.getAddress(owner.address, salt, sub);
-  // const sca = await hre.ethers.getContractAt("NonZKGoogleAccount", scaAddr);
-  // console.log("sca deployed to", scaAddr);
-  // console.log("owner:", await sca.owner());
+  hre.userConfig.defaultNetwork;
+  const [owner] = await ethers.getSigners();
+  /*
+  const [owner] = await hre.ethers.getSigners();
+  const scaFactory = await getContractFromDeployment("NonZKGoogleAccountFactory");
+  const [header, payload, signature] = options.jwt.split(".");
+  const idToken = JSON.parse(atob(payload));
+  const sub = idToken.sub;
+  const salt = options.salt ?? 1;
+  const pk = fs.readFileSync(options.publicKey ?? "test_key.pem");
+
+  const tx = await scaFactory.createAccount(owner.address, salt, sub);
+  await tx.wait();
+
+  const scaAddr: string = await scaFactory.getAddress(owner.address, salt, sub);
+  const sca = await hre.ethers.getContractAt("NonZKGoogleAccount", scaAddr);
+  console.log("sca deployed to", scaAddr);
+  console.log("owner:", await sca.owner());
+  */
 }
 
 // We recommend this pattern to be able to use async/await everywhere

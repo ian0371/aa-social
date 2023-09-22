@@ -4,11 +4,12 @@ pragma solidity ^0.8.12;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
-import "@openzeppelin/contracts/utils/Base64.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@account-abstraction/contracts/samples/SimpleAccount.sol";
 import "./JWT.sol";
 import "hardhat/console.sol";
 import "./lib/LibRsa.sol";
+import "./lib/LibBase64.sol";
 
 /**
  * minimal account.
@@ -18,33 +19,35 @@ import "./lib/LibRsa.sol";
  */
 contract NonZKGoogleAccount is SimpleAccount, JWT {
     string public sub;
-    string public recoveryNonce;
+    uint256 public recoveryNonce;
 
     constructor(IEntryPoint anEntryPoint) SimpleAccount(anEntryPoint) {}
 
-    function initialize(address anOwner, string memory _sub, string memory _recoveryNonce) public virtual initializer {
+    function initialize(address anOwner, string memory _sub) public virtual initializer {
         _initialize(anOwner);
         sub = _sub;
-        recoveryNonce = _recoveryNonce;
+    }
+
+    function _updateRecoveryNonce() internal {
+        recoveryNonce++;
     }
 
     function updateOwnerByGoogleOIDC(
         address newOwner,
         string calldata header,
         string calldata idToken,
-        bytes calldata sig,
-        string calldata newRecoveryNonce
+        bytes calldata sig
     ) external {
         require(verifySig(header, idToken, sig), "verifySig failed");
         require(verifySub(idToken), "verifySub failed");
         require(verifyNonce(idToken), "verifyNonce failed");
 
         owner = newOwner;
-        recoveryNonce = newRecoveryNonce;
+        _updateRecoveryNonce();
     }
 
     function verifySig(string calldata header, string calldata idToken, bytes calldata sig) public view returns (bool) {
-        string memory payload = Base64.encode(bytes(idToken));
+        string memory payload = LibBase64.urlEncode(bytes(idToken));
         if (
             LibRsa.rsapkcs1Verify(
                 sha256(abi.encodePacked(header, ".", payload)),
@@ -65,7 +68,9 @@ contract NonZKGoogleAccount is SimpleAccount, JWT {
     }
 
     function verifyNonce(string calldata idToken) public view returns (bool) {
-        if (keccak256(abi.encodePacked(recoveryNonce)) == keccak256(abi.encodePacked(_getNonce(idToken)))) return true;
+        string memory a = Strings.toString(recoveryNonce);
+        string memory b = _getNonce(idToken);
+        if (Strings.equal(a, b)) return true;
 
         return false;
     }

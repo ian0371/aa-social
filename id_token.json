@@ -2,7 +2,7 @@
     "iss": "http://server.example.com",
     "sub": "248289761001",
     "aud": "s6BhdRkqt3",
-    "nonce": "0xf26250c0d89849666ff4ec5a46887c36965d22cc0140292ce9be653172190310",
+    "nonce": "0",
     "iat": 1311281970,
     "exp": 1726640433,
     "name": "Jane Doe",

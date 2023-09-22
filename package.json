@@ -63,7 +63,7 @@
     "@openzeppelin/contracts": "^4.9.3",
     "commander": "^11.0.0",
     "dotenv": "^16.3.1",
-    "jsonwebtoken": "^9.0.2"
+    "jose": "^4.14.6"
   },
   "directories": {
     "lib": "lib",

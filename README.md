@@ -2,6 +2,8 @@
 
 ERC-4337 login contracts for OAuth recovery
 
+See [DESIGN.md](./DESIGN.md) for design.
+
 # Localhost
 
 ## Run a localhost network
@@ -11,6 +13,8 @@ npx hardhat node --tags localhost
 ```
 
 ## Setup SCA
+
+### Create SCA
 
 ```
 JWT=$(npx hardhat genjwt --nonce 0 --network localhost)
@@ -35,7 +39,7 @@ Output:
 ```
 * sca: 0xcd7D8013c3D342Ae2BD274c2549C49A3a68c33A7
 * sca.owner: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
-* deposit: 0.04ether
+* deposit: 0.00ether
 * sub: 248289761001
 * recoveryNonce: 0
 ```
@@ -46,10 +50,23 @@ If you forgot the sca address, give jwt instead to infer the address:
 npx hardhat sca-account --jwt $JWT --network localhost
 ```
 
-## Deposit
+### Deposit
 
 ```
 hh deposit --addr 0xcd7D8013c3D342Ae2BD274c2549C49A3a68c33A7 --network localhost
+```
+
+Check the deposit amount via `sca-account` task.
+
+```mermaid
+flowchart
+	kk[Kaikas]
+	sca[SCA]
+	fac[SCA Factory]
+
+	kk -- "createAccount\n(ownerAddress, salt, jwt.sub)" --> fac
+	fac -- "deploys" --> sca
+	kk -- "addDeposit()" --> sca
 ```
 
 ## Send UserOp (No bundler)

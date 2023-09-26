@@ -96,23 +96,31 @@ task("send-userop")
       entryPointAddress: ep.address,
       owner,
       factoryAddress: scaFactory.address,
+      overheads: { fixed: 50000 },
       // index: salt,
       sub: await sca.sub(),
     });
     const userOp = await walletAPI.createSignedUserOp({
-      target: counter.address,
-      data: counter.interface.encodeFunctionData("increment"),
-      maxFeePerGas: 2813300001, // TODO: autofill
-      maxPriorityFeePerGas: 2803299983, // TODO: autofill
+      //target: counter.address,
+      target: owner.address,
+      data: "0x",
+      //data: counter.interface.encodeFunctionData("increment"),
+      //value: 1e18,
+      //maxFeePerGas: 2813300001, // TODO: autofill
+      //maxPriorityFeePerGas: 2803299983, // TODO: autofill
     });
 
     console.log("counter.number before tx", await counter.number());
     if (bundler) {
       let rc;
       for (;;) {
-        const client = new HttpRpcClient(hre.network.config.url ?? "", ep.address, hre.network.config.chainId ?? 80001);
+        //const client = new HttpRpcClient(hre.network.config.url ?? "", ep.address, hre.network.config.chainId ?? 80001);
+        const client = new HttpRpcClient("http://localhost:4337", ep.address, 31337);
         const userOpHash = await client.sendUserOpToBundler(userOp);
-        rc = await hre.ethers.provider.send("eth_getUserOperationReceipt", [userOpHash]);
+
+        const aa_provider = new hre.ethers.providers.JsonRpcProvider("http://localhost:4337")
+        //rc = await hre.ethers.provider.send("eth_getUserOperationReceipt", [userOpHash]);
+        rc = await aa_provider.send("eth_getUserOperationReceipt", [userOpHash]);
         if (rc != null) break;
         await new Promise((resolve) => setTimeout(resolve, 5000));
         process.stdout.write(".");
@@ -163,7 +171,7 @@ const config: HardhatUserConfig = {
       saveDeployments: true,
     },
     mumbai: {
-      url: process.env.MUMBAI_URL,
+      url: process.env.MUMBAI_URL || "",
       chainId: 80001,
       accounts: [process.env.PRIVATE_KEY || defaultKey, process.env.NEW_PRIVATE_KEY || defaultKey2],
       live: true,
@@ -177,7 +185,7 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       url: "http://127.0.0.1:8545",
-      // accounts: [process.env.PRIVATE_KEY || defaultKey, defaultKey2],
+      accounts: [process.env.PRIVATE_KEY || defaultKey, defaultKey2],
       live: false,
       saveDeployments: true,
     },

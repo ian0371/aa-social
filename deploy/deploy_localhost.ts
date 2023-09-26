@@ -13,7 +13,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   await deploy("EntryPoint", {
     from: deployer.address,
-    gasLimit: 4000000,
+    gasLimit: 9_000_000,
     args: [],
     log: true,
   });
@@ -21,14 +21,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const ep = await deployments.get("EntryPoint");
   await deploy("NonZKGoogleAccountFactory", {
     from: deployer.address,
-    gasLimit: 8000000,
+    gasLimit: 9_000_000,
     args: [ep.address],
     log: true,
   });
 
   await deploy("Counter", {
     from: deployer.address,
-    gasLimit: 4000000,
+    gasLimit: 9_000_000,
     args: [],
     log: true,
   });
